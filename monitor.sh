@@ -22,6 +22,7 @@ LNDAB_CHANNEL_BACKUP_PATH=${LNDAB_CHANNEL_BACKUP_PATH:-"$LND_HOME/data/chain/$LN
 LNDAB_FILE_CREATION_POLLING_TIME=${LNDAB_FILE_CREATION_POLLING_TIME:-1}
 LNDAB_INOTIFYWAIT_OPTS=${LNDAB_INOTIFYWAIT_OPTS:-"-q"}
 LNDAB_CHECKSUM_FILE=${LNDAB_CHECKSUM_FILE:-.last_backup_checksum}
+LNDAB_PREFIX=${LNDAB_PREFIX}
 
 LNDAB_S3_BUCKET=${LNDAB_S3_BUCKET}
 LNDAB_S3_BACKUP_SCRIPT=${LNDAB_S3_BACKUP_SCRIPT:-$ROOT_DIR/backup-via-s3.sh}
@@ -70,9 +71,16 @@ wait_for_creation() {
 }
 
 generate_backup_label() {
-  local stamp
+  local stamp prefix
   stamp=$(date -d "today" +"%Y%m%d_%H%M_%S")
-  echo "${LND_CHAIN}_${LND_NETWORK}_${stamp}_channel.backup"
+
+  if [[ -n "$LNDAB_PREFIX" ]]; then
+    prefix="${LNDAB_PREFIX}_"
+  else
+    prefix=""
+  fi
+
+  echo "${prefix}${LND_CHAIN}_${LND_NETWORK}_${stamp}_channel.backup"
 }
 
 write_backup_sha() {
